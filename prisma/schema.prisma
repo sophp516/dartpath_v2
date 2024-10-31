@@ -11,7 +11,7 @@ model User {
   id       Int      @id @default(autoincrement())
   email    String   @unique
   password String
-  userName String   @unique
+  userName String   
   reviews  Review[]
 }
 
@@ -20,6 +20,8 @@ model Review {
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
   course    Course   @relation(fields: [courseId], references: [id])
+  professor Professor @relation(fields: [professorId], references: [id])
+  professorId Int
   courseId  Int
   content   String
   rating    Int
@@ -31,16 +33,20 @@ model Review {
 
 model Professor {
   id            Int      @id @default(autoincrement())
-  professorName String
+  professorName String   @unique
   courses       Course[]
+  reviews       Review[]
 }
 
 model Course {
   id              Int                   @id @default(autoincrement())
-  code            String
+  code            String                @unique
   courseName      String
   description     String
+  distrib         String[]
+  worldCulture    String[]
   professors      Professor[]
+  terms           Term[]                @relation("CourseTerms") // Link to Term model
   reviews         Review[]
   prerequisites   CoursePrerequisite[]  @relation("PrerequisiteCourses")
   prerequisiteFor CoursePrerequisite[]  @relation("CoursePrerequisites")
@@ -58,9 +64,8 @@ model CoursePrerequisite {
 
 model Term {
   id           Int      @id @default(autoincrement())
-  name         String   // e.g., "Fall 2023", "Spring 2024"
-  startDate    DateTime
-  endDate      DateTime
+  name         String   @unique
+  courses      Course[] @relation("CourseTerms") // Link to Course model
   reviews      Review[]
   gradeStats   CourseGradeStat[]
 }

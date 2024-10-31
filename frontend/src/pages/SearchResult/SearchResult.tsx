@@ -1,7 +1,16 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar/Navbar.tsx";
-import "./Home.css";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from 'react-router-dom';
+import Navbar from "../../components/Navbar/Navbar";
+import "./SearchResult.css"
+
+interface Course {
+    id: string,
+    code: string,
+    courseName: string,
+    description: string,
+    distrib: string[],
+    worldCulture: string[]
+}
 
 interface SearchQuery {
     input: string;
@@ -9,7 +18,13 @@ interface SearchQuery {
     worldCulture: string[];
 }
 
-const Home = () => {
+interface Professor {
+    id: string,
+    professorName: string,
+}
+
+const SearchResult = () => {
+    const location = useLocation();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState<SearchQuery>({
         input: '',
@@ -20,7 +35,8 @@ const Home = () => {
     const [selectedWorldCulture, setSelectedWorldCulture] = useState<string[]>([]);
     const [selectedDistrib, setSelectedDistrib] = useState<string[]>([]);
     const [input, setInput] = useState<string>('');
-
+    const { courseResult, profResult } = location.state || {};
+    
     const Distrib = [
         'art', 'lit', 'tmv', 'int', 'soc', 'qds', 'sci', 'sla', 'tas', 'tla'
     ];
@@ -28,6 +44,23 @@ const Home = () => {
     const WorldCulture = [
         'w', 'nw', 'cl'
     ];
+
+    const handleNavigateToCourseDetail = (courseId: string) => {
+        navigate('coursedetail', {
+            state: {
+                courseId
+            }
+        })
+    }
+
+    const handleNavigateToProfDetail = (profId: string, professorName: string) => {
+        navigate('profdetail', {
+            state: {
+                profId,
+                professorName
+            }
+        })
+    }
 
     const handleCheckboxChange = (category: string, value: string) => {
         if (category === 'worldCulture') {
@@ -90,11 +123,9 @@ const Home = () => {
     };
 
     return (
-        <div className="home">
+        <div className="searchresult">
             <Navbar />
-            <div className="home-main">
-                <p>WiCS</p>
-                <div className="search-container">
+            <div className="search-container">
                     {distribToggle ? (
                         <div>
                             <div>
@@ -129,7 +160,7 @@ const Home = () => {
                             <p>Search by distrib</p>
                             : 
                             <div>
-                                {selectedWorldCulture.map((req, i) => 
+                                {selectedWorldCulture.map((req) => 
                                 <label key={req}>
                                     <input
                                         type="checkbox"
@@ -138,7 +169,7 @@ const Home = () => {
                                     />
                                     {req.toUpperCase()}
                                 </label>)}
-                                {selectedDistrib.map((req, i) => 
+                                {selectedDistrib.map((req) => 
                                 <label key={req}>
                                     <input
                                         type="checkbox"
@@ -161,10 +192,23 @@ const Home = () => {
                         <button onClick={handleSearchClick}>Search</button>
                     </div>
                 </div>
-            </div>
+            {profResult?.length > 0 ?
+                profResult.map((prof: Professor) => {
+                    return (
+                        <div key={prof.id} onClick={() => handleNavigateToProfDetail(prof.id, prof.professorName)}>{prof.professorName}</div>
+                    )
+                })
+            : <p>No professor result found</p>}
+            {courseResult?.length > 0 ?
+                courseResult.map((course: Course) => {
+                return (
+                    <div key={course.id} onClick={() => handleNavigateToCourseDetail(course.id)}>{course.code}</div>
+                )
+            })
+            : <p>No course result found</p>
+            }
         </div>
-    );
-};
+    )
+}
 
-
-export default Home;
+export default SearchResult;
