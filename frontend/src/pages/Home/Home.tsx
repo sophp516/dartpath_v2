@@ -22,11 +22,11 @@ const Home = () => {
     const [input, setInput] = useState<string>('');
 
     const Distrib = [
-        'art', 'lit', 'tmv', 'int', 'soc', 'qds', 'sci', 'sla', 'tas', 'tla'
+        'ART', 'LIT', 'TMV', 'INT', 'SOC', 'QDS', 'SCI', 'SLA', 'TAS', 'TLA'
     ];
 
     const WorldCulture = [
-        'w', 'nw', 'cl'
+        'W', 'NW', 'CL'
     ];
 
     const handleCheckboxChange = (category: string, value: string) => {
@@ -59,16 +59,22 @@ const Home = () => {
     };
 
     const handleSearchClick = async () => {
-        console.log("Searching for:", searchQuery);
+        console.log("Initiating search with parameters:", searchQuery);
+
+        if (!searchQuery.input && searchQuery.distribs.length === 0 && searchQuery.worldCulture.length === 0) {
+            console.warn("No search criteria provided.");
+            return;
+        }
+
         try {
             const response = await fetch(`/api/course/search?textQuery=${searchQuery.input}&distribs=${searchQuery.distribs.join(',')}&worldCulture=${searchQuery.worldCulture.join(',')}`);
             
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`Network response was not ok, status: ${response.status}`);
             }
     
             const data = await response.json();
-            console.log("Search results:", data);
+            console.log("Received search results:", data);
 
             navigate(
                 '/searchresult', {
@@ -76,7 +82,7 @@ const Home = () => {
                         courseResult: data.courses,
                         profResult: data.professors
                     }
-                })
+                });
 
         } catch (error) {
             console.error("Error fetching search results:", error);
@@ -85,7 +91,7 @@ const Home = () => {
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter") {
-          handleSearchClick();
+            handleSearchClick();
         }
     };
 
@@ -105,7 +111,7 @@ const Home = () => {
                                             checked={selectedWorldCulture.includes(req)}
                                             onChange={() => handleCheckboxChange('worldCulture', req)}
                                         />
-                                        {req.toUpperCase()}
+                                        {req}
                                     </label>
                                 ))}
                             </div>
@@ -117,36 +123,36 @@ const Home = () => {
                                             checked={selectedDistrib.includes(req)}
                                             onChange={() => handleCheckboxChange('distrib', req)}
                                         />
-                                        {req.toUpperCase()}
+                                        {req}
                                     </label>
                                 ))}
                             </div>
-                            <button onClick={() => setDistribToggle(false)}>save</button>
+                            <button onClick={() => setDistribToggle(false)}>Save</button>
                         </div>
                     ) : (
                         <div onClick={() => setDistribToggle(true)}>
-                            {(selectedDistrib.length === 0 && selectedWorldCulture.length == 0) ?
+                            {(selectedDistrib.length === 0 && selectedWorldCulture.length === 0) ?
                             <p>Search by distrib</p>
                             : 
                             <div>
-                                {selectedWorldCulture.map((req, i) => 
-                                <label key={req}>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedWorldCulture.includes(req)}
-                                        onChange={() => handleCheckboxChange('worldCulture', req)}
-                                    />
-                                    {req.toUpperCase()}
-                                </label>)}
-                                {selectedDistrib.map((req, i) => 
-                                <label key={req}>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedDistrib.includes(req)}
-                                        onChange={() => handleCheckboxChange('distrib', req)}
-                                    />
-                                    {req.toUpperCase()}
-                                </label>)}
+                                {selectedWorldCulture.map(req => (
+                                    <label key={req}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedWorldCulture.includes(req)}
+                                            onChange={() => handleCheckboxChange('worldCulture', req)}
+                                        />
+                                        {req}
+                                    </label>))}
+                                {selectedDistrib.map(req => (
+                                    <label key={req}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedDistrib.includes(req)}
+                                            onChange={() => handleCheckboxChange('distrib', req)}
+                                        />
+                                        {req}
+                                    </label>))}
                             </div>}
                         </div>
                     )}
@@ -165,6 +171,5 @@ const Home = () => {
         </div>
     );
 };
-
 
 export default Home;

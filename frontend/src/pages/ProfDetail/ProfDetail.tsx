@@ -2,29 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Review from "../../components/Review/Review";
 import Navbar from "../../components/Navbar/Navbar";
+import { CourseModel, ReviewModel } from "../../models/db.interface";
 
 interface LocationState {
     profId?: string;
     professorName?: string;
-}
-
-interface Course {
-    id: string,
-    code: string,
-    courseName: string,
-    description: string,
-    distrib: string[],
-    worldCulture: string[]
-}
-
-interface Review {
-    id: number;              
-    userId: number;        
-    courseId: number;     
-    content: string;       
-    rating: number;        
-    grade?: string;    
-    termId: number;       
 }
 
 const ProfDetail = () => {
@@ -32,8 +14,8 @@ const ProfDetail = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { profId, professorName } = (location.state as LocationState) || {};
-    const [courses, setCourses] = useState<Course[]>()
-    const [reviews, setReviews] = useState<Review[]>();
+    const [courses, setCourses] = useState<CourseModel[]>()
+    const [reviews, setReviews] = useState<ReviewModel[]>();
 
     const handleNavigateToCourseDetail = (courseId: string) => {
         navigate('coursedetail', {

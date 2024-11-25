@@ -1,0 +1,35 @@
+.table-container {
+    width: 100%; /* Container width sets the maximum width for the table */
+    overflow-x: auto; /* Allow horizontal scrolling on small screens */
+}
+
+#draft-table {
+    width: 100%; /* Table fills the container */
+    table-layout: fixed;
+    border-collapse: collapse; /* Optional: Remove space between cells */
+}
+
+.season {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.term-container {
+    width: 100%; /* Ensures it fills the cell */
+    height: 5rem; /* Set a consistent height for each cell */
+    min-height: 8rem;
+    border: 2px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-align: center;
+    box-sizing: border-box; /* Ensures padding doesn’t increase width */
+}
+
+#draft-table th:first-child,
+#draft-table td:first-child {
+    width: 6%; /* Adjust this percentage as needed */
+    text-align: center;
+}

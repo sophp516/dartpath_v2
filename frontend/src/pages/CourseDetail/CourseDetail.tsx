@@ -1,57 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Review from "../../components/Review/Review";
+import Navbar from "../../components/Navbar/Navbar";
+import { ReviewModel, CourseModel, CourseGradeStatModel, CoursePrerequisiteModel } from "../../models/db.interface";
 
 interface LocationState {
     courseId?: string;
 }
 
-interface CourseGradeStat {
-    id: number;
-    courseId: number;
-    termId: number;
-    medianGrade: number;
-}
-
-interface CoursePrerequisite {
-    courseId: number;         
-    prerequisiteId: number;    
-}
-
-interface Review {
-    id: number;              
-    userId: number;        
-    courseId: number;     
-    content: string;       
-    rating: number;        
-    grade?: string;    
-    termId: number;       
-}
-
-interface Professor {
-    id: string,
-    professorName: string,
-}
-
-interface Course {
-    id: number;                // Change to number as per Prisma model
-    code: string;
-    courseName: string;
-    description: string;
-    distrib: string[];
-    worldCulture: string[];
-    reviews: Review[];
-    professors: Professor[];
-    gradeStats: CourseGradeStat[];          // Include grade stats
-    prerequisites: CoursePrerequisite[];    // Include prerequisites
-}
-
 const CourseDetail = () => {
     const location = useLocation();
     const { courseId } = (location.state as LocationState) || {};
-    const [course, setCourse] = useState<Course | null>(null);
-    const [prereqs, setPrereqs] = useState<Course[] | []>();
-    console.log(course);
+    const [course, setCourse] = useState<CourseModel | null>(null);
+    const [prereqs, setPrereqs] = useState<CourseModel[] | []>();
+    console.log(course?.distribs);
+    console.log(course?.worldCulture);
 
     useEffect(() => {
         if (!courseId) return;
@@ -90,11 +53,20 @@ const CourseDetail = () => {
 
     return (
         <div>
+            <Navbar />
             <div>
                 <h2>{`${course?.code}: ${course?.courseName}`}</h2>
                 <p>{course?.description}</p>
-                <p>Distribution Areas: {course?.distrib.length > 0 ? course?.distrib.join(", ").toUpperCase() : "N/A"}</p>
-                    <p>World Culture: {course?.worldCulture.length > 0 ? course?.worldCulture.join(", ").toUpperCase() : "N/A"}</p>
+                    <p>
+                    Distribution Areas: {course?.distribs && course.distribs.length > 0 && Array.isArray(course.distribs) 
+                        ? course.distribs.map(d => d.distrib).join(", ").toUpperCase() 
+                        : "N/A"}
+                    </p>
+                    <p>
+                    World Culture: {course?.worldCulture && course.worldCulture.length > 0 && Array.isArray(course.worldCulture)
+                        ? course.worldCulture.map(wc => wc.worldCulture).join(", ").toUpperCase() 
+                        : "N/A"}
+                    </p>
                     <h2>Grade Stats</h2>
                     {course?.gradeStats.map(stat => (
                         <div key={stat.id}>

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import courseRoutes from "./routes/course.routes";
 import profRoutes from "./routes/prof.routes"
+import userRoutes from "./routes/user.routes"
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/course", courseRoutes);
 app.use("/api/prof", profRoutes);
+app.use("/api/profile", userRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)

@@ -1,26 +1,13 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from "../../components/Navbar/Navbar";
+import { CourseModel, ProfessorModel } from "../../models/db.interface";
 import "./SearchResult.css"
-
-interface Course {
-    id: string,
-    code: string,
-    courseName: string,
-    description: string,
-    distrib: string[],
-    worldCulture: string[]
-}
 
 interface SearchQuery {
     input: string;
     distribs: string[];
     worldCulture: string[];
-}
-
-interface Professor {
-    id: string,
-    professorName: string,
 }
 
 const SearchResult = () => {
@@ -193,16 +180,16 @@ const SearchResult = () => {
                     </div>
                 </div>
             {profResult?.length > 0 ?
-                profResult.map((prof: Professor) => {
+                profResult.map((prof: ProfessorModel) => {
                     return (
                         <div key={prof.id} onClick={() => handleNavigateToProfDetail(prof.id, prof.professorName)}>{prof.professorName}</div>
                     )
                 })
             : <p>No professor result found</p>}
             {courseResult?.length > 0 ?
-                courseResult.map((course: Course) => {
+                courseResult.map((course: CourseModel) => {
                 return (
-                    <div key={course.id} onClick={() => handleNavigateToCourseDetail(course.id)}>{course.code}</div>
+                    <div key={course.id} onClick={() => handleNavigateToCourseDetail(course.id.toString())}>{course.code}</div>
                 )
             })
             : <p>No course result found</p>

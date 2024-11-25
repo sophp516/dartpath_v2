@@ -8,11 +8,81 @@ datasource db {
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  password String
-  userName String   
-  reviews  Review[]
+  id               Int          @id @default(autoincrement())
+  email            String       @unique
+  password         String
+  userName         String
+  reviews          Review[]
+  majors           UserMajor[]
+  minors           UserMinor[]
+  mainDraftId      Int
+  drafts           UserDraft[]  @relation("UserDrafts")      // Named relation
+  PublishedDrafts  UserDraft[]  @relation("PublishedDrafts") // Named relation
+  color0           String
+  color1           String
+  color2           String
+}
+
+model Major {
+  id              Int               @id @default(autoincrement())
+  majorName       String
+  users           UserMajor[]       // Many-to-many relation to User through UserMajor
+  reqs            RequirementGroup[] @relation("MajorReqs")
+}
+
+model Minor {
+  id              Int               @id @default(autoincrement())
+  minorName       String
+  users           UserMinor[]       // Many-to-many relation to User through UserMinor
+  reqs            RequirementGroup[]  @relation("MinorReqs")
+}
+
+model UserMajor {
+  id         Int     @id @default(autoincrement())
+  userId     Int
+  majorId    Int
+  user       User    @relation(fields: [userId], references: [id])
+  major      Major   @relation(fields: [majorId], references: [id])
+
+  @@unique([userId, majorId]) // Ensure each major is unique per user
+}
+
+model UserMinor {
+  id         Int     @id @default(autoincrement())
+  userId     Int
+  minorId    Int
+  user       User    @relation(fields: [userId], references: [id])
+  minor      Minor   @relation(fields: [minorId], references: [id])
+
+  @@unique([userId, minorId]) // Ensure each minor is unique per user
+}
+
+model UserDraft {
+  id             Int       @id @default(autoincrement())
+  userId         Int
+  title          String
+  termList       UserTerm[]  @relation("DraftTerms")
+  user           User      @relation(fields: [userId], references: [id], name: "UserDrafts", map: "fk_userdraft_user", onDelete: Cascade)
+  publishedUser  User?     @relation(fields: [userId], references: [id], name: "PublishedDrafts", map: "fk_userdraft_publishedUser", onDelete: Cascade)
+}
+
+model UserTerm {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  onOffStatus   Boolean
+  comment       String
+  courseList    UserCourse[]  @relation("UserTermToUserCourse")
+  draft         UserDraft?    @relation("DraftTerms", fields: [draftId], references: [id], onDelete: Cascade)
+  draftId       Int?
+}
+
+model UserCourse {
+  id          Int         @id @default(autoincrement())
+  courseId    Int
+  color       Int
+  course      Course      @relation(fields: [courseId], references: [id], name: "UserCourseToCourse")
+  userTerm    UserTerm    @relation("UserTermToUserCourse", fields: [userTermId], references: [id], onDelete: Cascade)
+  userTermId  Int
 }
 
 model Review {
@@ -38,19 +108,35 @@ model Professor {
   reviews       Review[]
 }
 
+model CourseDistrib {
+  id       Int    @id @default(autoincrement())
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId Int
+  distrib  String
+}
+
+model worldCulture {
+  id       Int    @id @default(autoincrement())
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId Int
+  worldCulture  String
+}
+
 model Course {
   id              Int                   @id @default(autoincrement())
   code            String                @unique
   courseName      String
   description     String
-  distrib         String[]
-  worldCulture    String[]
+  distribs        CourseDistrib[]
+  worldCulture    worldCulture[]
   professors      Professor[]
-  terms           Term[]                @relation("CourseTerms") // Link to Term model
+  terms           Term[]                @relation("CourseTerms")
   reviews         Review[]
   prerequisites   CoursePrerequisite[]  @relation("PrerequisiteCourses")
   prerequisiteFor CoursePrerequisite[]  @relation("CoursePrerequisites")
   gradeStats      CourseGradeStat[]
+  userCourses     UserCourse[]          @relation("UserCourseToCourse")
+  requirementGroups RequirementGroup[]  @relation("CourseRequirements") // Add this line
 }
 
 model CoursePrerequisite {
@@ -79,4 +165,25 @@ model CourseGradeStat {
   medianGrade Float  // Store as a float for flexibility (e.g., 3.7 for A-)
   
   @@unique([courseId, termId])
+}
+
+model RequirementGroup {
+  id            Int               @id @default(autoincrement())
+  majorReq      Major?            @relation("MajorReqs", fields: [majorId], references: [id])
+  minorReq      Minor?            @relation("MinorReqs", fields: [minorId], references: [id])
+  majorId       Int?
+  minorId       Int?
+  name          String            // e.g., "Intro Requirements", "Systems Courses", "Theory Courses"
+  type          RequirementType   // MANDATORY or RANGE
+  requiredCount Int               // Number of courses needed from this group
+  codeStart     Int?             // Starting course number (e.g., 30 for COSC 30-39)
+  codeEnd       Int?             // Ending course number (e.g., 39 for COSC 30-39)
+  department    String?          // e.g., "COSC", "MATH"
+  description   String           // Description of the requirement
+  courses       Course[]         @relation("CourseRequirements") // Added relation name
+}
+
+enum RequirementType {
+  MANDATORY
+  RANGE
 }
